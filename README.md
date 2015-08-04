@@ -1,89 +1,48 @@
-# accounts-guest
+# accounts-anonymous
 ============
 
-Automatically add visitor as anonymous guest with userId
+Allow users to login anonymously (i.e. no username, email, password, or OAuth
+service like accounts-google)
 
 ## Features
-- each non-logged in visitor gets a userId, accessible via Accounts and Meteor:userId()
-- includes configurable cleanup function
-- supports truly anonymous guests which do not require accounts-password
-
+- Supports truly anonymous users
+- Does not require accounts-password
+- Fires server event when an anonymous user successfully logs in as a different
+  user
 
 ## Installation
 ```sh
-meteor add artwells:accounts-guest
-```
-Followed by
-```sh
-meteor add accounts-ui
-
-```
-or
-```sh
-meteor add ian:accounts-ui-bootstrap-3
-```
-or any other accounts-ui derivative.
-
-
-
-
-
-optionally (to clean out old guest accounts) in server-only code
-```javascript
-Accounts.removeOldGuests([time before]);
+meteor add brettle:accounts-anonymous
 ```
 
-Now Meteor.userId() will be populated for each new visitor, including across reloads
+## Usage
 
-## Examples
+On the client, to login as a new anonymous user, call
+`AccountsAnonymous.login([callback])`, while not logged in. The optional
+`callback` will be called with no arguments on success, or with a single `Error`
+argument on failure. If the login was successful,  Meteor will have stored a
+"resume" login token in the browser's localStorage which it will automatically
+send when making future  connections to the server. This token allows the user
+to resume as the same anonymous user as long as the token hasn't
+[expired](http://docs.meteor.com/#/full/accounts_config), been deleted (e.g. by
+calling  `Accounts.logout()`), or been replaced (e.g. by logging as some other
+user).
 
-```javascript
-/* clean out all guest accounts more than 24 hours old (default behavior) */
-Accounts.removeOldGuests();
-```
-or
+On the server, call `AccountsAnonymous.onAbandoned(func)` to register a callback
+to be called if an anonymous user successfully logs in as a different user. When
+this occurs, the anonymous user's token will be replaced and so there will be no
+way to log in again as the anonymous user. The `func` callback takes the
+anonymous user as its only argument, and could be used to clean up any data
+associated with the user.
 
-```javascript
-/* clean out all guest accounts more than 2 hours old */
-var before = new Date();
-before.setHours(before.getHours() - 2);
-Accounts.removeOldGuests(before);
-```
+## History and Acknowledgements
 
-
-
-## Options (Set in server code at start up)
-
-* `AccountsGuest.enabled`,  default true. Automatically logs in all visitors.
-* `AccountsGuest.forced`,  default true. Will force recently logged out accounts into guest mode.
-* `AccountsGuest.name`,  default false. If true, assign the guest a friendly nickname.
-* `AccountsGuest.anonymous`,  default false. If true, do not require acccounts-password and make guests
-  anonymous (i.e. no auto-generated username and email).
-
-##Option Examples
-
-In code available to server, to temporarily or conditionally disable guest login
-```javascript
-AccountsGuest.enabled = false
-```
-
-In code available to client, to temporarily or conditionally disable guest login after user logout
-```javascript
-AccountsGuest.enabled = true
-```
-
-In code available to server, to assign the guest a friendly nickname
-```javascript
-AccountsGuest.name = true
-```
-
-In code available to server, to not require acccounts-password and make guests
-  anonymous (i.e. no auto-generated username and email).:
-```javascript
-AccountsGuest.anonymous = true
-```
-
-## TODO
-- tests for forced, and enabled options
-- Allow guest session merged into new session if a visitor logs in
-- Allow merged session/other variables to be specified in config
+This is a friendly hard fork of the excellent
+[artwells:accounts-guest](https://github.com/artwells/meteor-accounts-guest)
+package. Before the fork, I [contributed
+code](https://github.com/artwells/meteor-accounts-guest/pull/35) which allowed
+artwells:accounts-guest to be used without accounts-password. I'm forking now
+because I'm not interested in the password-based guests which that package uses
+and I'd also like to split out some of the features into separate packages. I
+don't see any way to make these changes to artwells:accounts-guest without
+breaking compatibility for existing users of that package. Thus the hard fork.
