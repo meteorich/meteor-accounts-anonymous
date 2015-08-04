@@ -65,7 +65,7 @@ var loginAttemptHandler = function () {
     onLoginFailureStopper.stop();
     if (attemptingUserId != null && attempt.type != 'resume') {
       var attemptingUser = Meteor.users.findOne({ _id: attemptingUserId });
-      if (isGuest(attemptingUser)) {
+      if (attemptingUser && isGuest(attemptingUser)) {
         AccountsAnonymous._onAbandonedHook.each(function (callback) {
             callback(attemptingUser);
             return true;
