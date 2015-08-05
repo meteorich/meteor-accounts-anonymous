@@ -1,3 +1,5 @@
+var Fiber = Npm.require('fibers');
+
 Accounts.registerLoginHandler("anonymous", function (options) {
     if (! options || ! options.anonymous || Meteor.userId())
         return undefined;
@@ -59,8 +61,13 @@ var dontBindEnvironment = function (func, onException, _this) {
 };
 
 var loginAttemptHandler = function () {
+  // Capture the attempting user's id and register one-off onLogin and
+  // onLoginFailure callbacks that will only run on this fiber
   var attemptingUserId = Meteor.userId();
+  var registeringFiber = Fiber.current;
   var onLoginStopper = Accounts.onLogin(function (attempt) {
+    if (Fiber.current != registeringFiber)
+      return;
     onLoginStopper.stop();
     onLoginFailureStopper.stop();
     if (attemptingUserId != null && attempt.type != 'resume') {
@@ -74,6 +81,8 @@ var loginAttemptHandler = function () {
     }
   });
   var onLoginFailureStopper = Accounts.onLoginFailure(function (attempt) {
+    if (Fiber.current != registeringFiber)
+      return;
     onLoginStopper.stop();
     onLoginFailureStopper.stop();
   });
