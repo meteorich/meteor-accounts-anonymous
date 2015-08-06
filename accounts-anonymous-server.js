@@ -1,5 +1,3 @@
-var Fiber = Npm.require('fibers');
-
 Accounts.registerLoginHandler("anonymous", function (options) {
     if (! options || ! options.anonymous || Meteor.userId())
         return undefined;
@@ -20,84 +18,18 @@ AccountsAnonymous.onAbandoned = function (func) {
   return self._onAbandonedHook.register(func);
 };
 
-
-var loginAttemptHandler = function () {
-  // Capture the attempting user's id and register one-off onLogin and
-  // onLoginFailure callbacks that will only run on this fiber
-  var attemptingUserId = Meteor.userId();
-  var registeringFiber = Fiber.current;
-  var onLoginStopper = Accounts.onLogin(function (attempt) {
-    if (Fiber.current != registeringFiber)
-      return;
-    onLoginStopper.stop();
-    onLoginFailureStopper.stop();
-    if (attemptingUserId != null && attempt.type != 'resume') {
-      var attemptingUser = Meteor.users.findOne({ _id: attemptingUserId });
-      if (attemptingUser && isGuest(attemptingUser)) {
-        AccountsAnonymous._onAbandonedHook.each(function (callback) {
-            callback(attemptingUser);
-            return true;
-        });
-      }
+AccountsMultiple.register({
+  onSwitch: function (attemptingUser, attempt) {
+    if (isGuest(attemptingUser)) {
+      AccountsAnonymous._onAbandonedHook.each(function (callback) {
+          callback(attemptingUser);
+          return true;
+      });
     }
-  });
-  var onLoginFailureStopper = Accounts.onLoginFailure(function (attempt) {
-    if (Fiber.current != registeringFiber)
-      return;
-    onLoginStopper.stop();
-    onLoginFailureStopper.stop();
-  });
-  return true;
-};
-
-WithoutBindingEnvironment(function () {
-  Accounts.validateLoginAttempt(loginAttemptHandler);
+  }
 });
 
 var isGuest = function(user) {
   // A user is a guest if they don't have any services other than "resume"
   return (user.services && _.size(user.services) === 1 && user.services.resume);
 };
-
-
-/* Workaround for Meteor issue #4862:
-   See https://github.com/meteor/meteor/issues/4862.
- */
-function WithoutBindingEnvironment(func) {
-  var saved = Meteor.bindEnvironment;
-  try {
-    Meteor.bindEnvironment = dontBindEnvironment;
-    return func();
-  } finally {
-    Meteor.bindEnvironment = saved;
-  }
-  return;
-
-  // Copied from Meteor.bindEnvironment and removed all the env stuff.
-  function dontBindEnvironment(func, onException, _this) {
-    if (!onException || typeof(onException) === 'string') {
-      var description = onException || "callback of async function";
-      onException = function (error) {
-        Meteor._debug(
-          "Exception in " + description + ":",
-          error && error.stack || error
-        );
-      };
-    }
-
-    return function (/* arguments */) {
-      var args = _.toArray(arguments);
-
-      var runAndHandleExceptions = function () {
-        try {
-          var ret = func.apply(_this, args);
-        } catch (e) {
-          onException(e);
-        }
-        return ret;
-      };
-
-      return runAndHandleExceptions();
-    };
-  }
-}

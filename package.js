@@ -10,6 +10,7 @@ Package.onUse(function (api) {
     api.use(['accounts-base'], 'client');
     api.use(['accounts-base', 'callback-hook'], 'server');
     api.use('underscore', 'server');
+    api.use('brettle:accounts-multiple', 'server');
     api.add_files('accounts-anonymous.js', ['client','server']);
     api.export('AccountsAnonymous');
     api.add_files('accounts-anonymous-server.js', 'server');
