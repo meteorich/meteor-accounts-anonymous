@@ -20,7 +20,7 @@ AccountsAnonymous.onAbandoned = function (func) {
 
 AccountsMultiple.register({
   onSwitch: function (attemptingUser, attempt) {
-    if (isGuest(attemptingUser)) {
+    if (isAnonymous(attemptingUser)) {
       AccountsAnonymous._onAbandonedHook.each(function (callback) {
           callback(attemptingUser);
           return true;
@@ -29,7 +29,7 @@ AccountsMultiple.register({
   }
 });
 
-var isGuest = function(user) {
-  // A user is a guest if they don't have any services other than "resume"
+function isAnonymous(user) {
+  // A user is anonymous if they don't have any services other than "resume"
   return (user.services && _.size(user.services) === 1 && user.services.resume);
-};
+}
