@@ -1,5 +1,6 @@
-# accounts-anonymous
-============
+# brettle:accounts-anonymous
+
+[![Build Status](https://travis-ci.org/brettle/meteor-accounts-anonymous.svg?branch=master)](https://travis-ci.org/brettle/meteor-accounts-anonymous)
 
 Allow users to login anonymously (i.e. no username, email, password, or OAuth
 service like accounts-google)
