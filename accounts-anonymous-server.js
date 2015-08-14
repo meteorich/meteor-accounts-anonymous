@@ -18,7 +18,7 @@ AccountsAnonymous.onAbandoned = function (func) {
   return self._onAbandonedHook.register(func);
 };
 
-AccountsMultiple.register({
+var callbackSet = {
   onSwitch: function (attemptingUser, attempt) {
     if (isAnonymous(attemptingUser)) {
       AccountsAnonymous._onAbandonedHook.each(function (callback) {
@@ -27,7 +27,13 @@ AccountsMultiple.register({
       });
     }
   }
-});
+};
+
+AccountsAnonymous._init = function () {
+  AccountsMultiple.register(callbackSet);
+};
+
+AccountsAnonymous._init();
 
 function isAnonymous(user) {
   // A user is anonymous if they don't have any services other than "resume"

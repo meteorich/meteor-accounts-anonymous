@@ -1,4 +1,6 @@
 Tinytest.add('AccountsAnonymous - onAbandoned', function (test) {
+  AccountsMultiple._unregisterAll();
+  AccountsAnonymous._init();
   AccountsAnonymous.onAbandoned(function (user) {
     actualCalls++;
     actualId = user._id;
@@ -29,6 +31,8 @@ Tinytest.add('AccountsAnonymous - onAbandoned', function (test) {
 });
 
 Tinytest.add('AccountsAnonymous - onAbandoned - user already removed', function (test) {
+  AccountsMultiple._unregisterAll();
+  AccountsAnonymous._init();
   var onAbandonedCalls = 0;
   AccountsAnonymous.onAbandoned(function (user) {
     onAbandonedCalls++;

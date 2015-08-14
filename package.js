@@ -1,6 +1,6 @@
 Package.describe({
     summary: "Support anonymous logins",
-    version: "0.0.3",
+    version: "0.1.0",
     name: "brettle:accounts-anonymous",
     git: "https://github.com/brettle/meteor-accounts-anonymous.git"
 });
@@ -19,7 +19,8 @@ Package.onUse(function (api) {
 
 Package.onTest(function (api) {
     api.versionsFrom("METEOR@0.9.0");
-    api.use(['brettle:accounts-anonymous@0.0.1', 'accounts-base', 'tinytest'], ['client','server']);
+    api.use(['brettle:accounts-anonymous@0.1.0', 'accounts-base', 'tinytest'], ['client','server']);
+    api.use('brettle:accounts-multiple@0.1.0');
     api.use('accounts-password', 'server');
     api.use('ddp', 'server');
     api.add_files('accounts-anonymous-server-tests.js', 'server');
