@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: "Support anonymous logins",
-  version: "0.2.0",
+  version: "0.3.0",
   name: "brettle:accounts-anonymous",
   git: "https://github.com/brettle/meteor-accounts-anonymous.git"
 });
