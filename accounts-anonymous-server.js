@@ -1,11 +1,15 @@
-Accounts.registerLoginHandler("anonymous", function (options) {
-    if (! options || ! options.anonymous || Meteor.userId())
-        return undefined;
+"use strict";
+/* globals AccountsAnonymous, AccountsMultiple, Hook */
 
-    var newUserId = Accounts.insertUserDoc(options, {});
-    return {
-        userId: newUserId
-    };
+Accounts.registerLoginHandler("anonymous", function(options) {
+  if (!options || !options.anonymous || Meteor.userId()) {
+    return undefined;
+  }
+
+  var newUserId = Accounts.insertUserDoc(options, {});
+  return {
+    userId: newUserId
+  };
 });
 
 AccountsAnonymous._onAbandonedHook = new Hook({
@@ -13,23 +17,23 @@ AccountsAnonymous._onAbandonedHook = new Hook({
   debugPrintExceptions: "AccountsAnonymous.onAbandoned callback"
 });
 
-AccountsAnonymous.onAbandoned = function (func) {
+AccountsAnonymous.onAbandoned = function(func) {
   var self = this;
   return self._onAbandonedHook.register(func);
 };
 
 var callbackSet = {
-  onSwitch: function (attemptingUser, attempt) {
+  onSwitch: function(attemptingUser /* , attempt (unused) */) {
     if (isAnonymous(attemptingUser)) {
-      AccountsAnonymous._onAbandonedHook.each(function (callback) {
-          callback(attemptingUser);
-          return true;
+      AccountsAnonymous._onAbandonedHook.each(function(callback) {
+        callback(attemptingUser);
+        return true;
       });
     }
   }
 };
 
-AccountsAnonymous._init = function () {
+AccountsAnonymous._init = function() {
   AccountsMultiple.register(callbackSet);
 };
 

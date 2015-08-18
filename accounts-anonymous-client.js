@@ -1,3 +1,6 @@
+"use strict";
+/* globals AccountsAnonymous */
+
 AccountsAnonymous.login = function (callback) {
   callback = callback || function () {};
   if (Meteor.userId()) {
@@ -9,12 +12,12 @@ AccountsAnonymous.login = function (callback) {
     methodArguments: [{
       anonymous: true
     }],
-    userCallback: function (error, result) {
+    userCallback: function (error) {
       if (error) {
-        callback && callback(error);
+        if (callback) { callback(error); }
       } else {
-        callback && callback();
+        if (callback) { callback(); }
       }
     }
   });
-}
+};
