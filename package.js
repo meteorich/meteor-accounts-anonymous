@@ -7,8 +7,9 @@ Package.describe({
   git: "https://github.com/brettle/meteor-accounts-anonymous.git"
 });
 
-Package.onUse(function(api) {
+Package.onUse(function (api) {
   api.versionsFrom('1.0.4');
+  api.versionsFrom('2.4');
   api.use(['accounts-base'], 'client');
   api.use(['accounts-base', 'callback-hook'], 'server');
   api.use('underscore', 'server');
@@ -19,7 +20,7 @@ Package.onUse(function(api) {
   api.addFiles('accounts-anonymous-client.js', 'client');
 });
 
-Package.onTest(function(api) {
+Package.onTest(function (api) {
   api.versionsFrom('1.0.4');
   api.use(['brettle:accounts-anonymous@0.3.1', 'accounts-base', 'tinytest'],
     ['client', 'server']);
